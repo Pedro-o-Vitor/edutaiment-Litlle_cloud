@@ -1,19 +1,19 @@
 {
-  "name": "Little cloud",
-  "short_name": "Littlecloud",
-  "description": "edutaiment sobre nuvem para crianças.",
-  "start_url": "/index.html",
+  "name": "Little Cloud Edutainment",
+  "short_name": "Little Cloud",
+  "description": "Um site de edutainment sobre computação em nuvem para crianças.",
+  "start_url": "/edutaiment-Litlle_cloud/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#4285f4",
   "icons": [
     {
-      "src": "icon-192x192.png",
+      "src": "assets/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512x512.png",
+      "src": "assets/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
