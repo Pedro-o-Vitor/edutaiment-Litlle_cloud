@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seleção de Jogos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" href="/manifest.json">
+<style>
+    body {
+        font-family: 'Fredoka', sans-serif;
+        background: linear-gradient(135deg, #fbc2eb, #a6c0fe);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 2rem;
+        text-align: center;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    h1 {
+        color: #fff;
+        font-size: 3rem;
+        margin-bottom: 2rem;
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .games-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 2rem;
+        width: 90%;
+        max-width: 900px;
+        margin-top: 5vh; /* desloca os cards um pouco para baixo */
+        justify-items: center;
+        align-items: center;
+    }
+
+    .game-card {
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+        border-radius: 25px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .game-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+    }
+
+    .game-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        display: block;
+        border-radius: 25px;
+    }
+
+    .game-card p {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        font-weight: bold;
+        font-size: 1.4rem;
+        color: #fff;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+        background: rgba(0,0,0,0.2);
+        padding: 0.3rem 0.8rem;
+        border-radius: 10px;
+    }
+
+    .back-button {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        text-decoration: none;
+        transition: transform 0.2s;
+    }
+
+    .back-button:hover {
+        transform: scale(1.1);
+    }
+
+    .back-button-icon {
+        font-size: 2rem;
+        color: #8862d8;
+    }
+</style>
+</head>
+<body>
+
+<a href="telainicial.html" class="back-button">
+    <span class="back-button-icon">⬅</span>
+</a>
+
+
+<div class="games-container">
+    <div class="game-card" onclick="location.href='conectarfios.html'">
+        <img src="nuvemjogo1.png" alt="Conectar Fios">
+        <p>Conectar Fios</p>
+    </div>
+    <div class="game-card" onclick="location.href='arrastaresoltar.html'">
+        <img src="nuvemjogo2.png" alt="Itens na nuvem">
+        <p>Arrastar e Soltar</p>
+    </div>
+    <div class="game-card" onclick="location.href='protegernuvens.html'">
+        <img src="nuvemjogo3.png" alt="Proteger Nuvens">
+        <p>Proteger Nuvens</p>
+    </div>
+    <div class="game-card" onclick="location.href='publicaeprivada.html'">
+        <img src="nuvemjogo4.png" alt="Pública e Privada">
+        <p>Pública e Privada</p>
+    </div>
+</div>
+<script src="/register-sw.js"></script>
+</body>
+</html>

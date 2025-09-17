@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nuvens e Robôs Dançantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(135deg, #e0eafc, #c9d6ff);
+    margin: 0;
+    padding: 30px;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+    color: #4a148c;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+  }
+
+  #game-layout {
+    display: grid;
+    grid-template-areas:
+      "items-container items-container"
+      "cloud1 cloud2"
+      "gif1 gif2";
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 20px;
+    width: 80%;
+    max-width: 900px;
+    position: relative;
+    border-radius: 20px;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  #items-container {
+    grid-area: items-container;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 20px;
+  }
+
+  .item {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
+    background: linear-gradient(145deg, #bbfffe, #d0d7fd);
+    user-select: none;
+  }
+  .item:active { cursor: grabbing; transform: scale(1.1); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); }
+  .item img { width: 80%; height: 80%; object-fit: contain; pointer-events: none; }
+  .item:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+
+  .cloud {
+    width: 100%;
+    height: 150px;
+    position: relative;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease-in-out;
+  }
+
+  .gif-container { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .gif1 { grid-area: gif1; }
+  .gif2 { grid-area: gif2; }
+  .gif-container img { width: 150px; height: auto; display: none; }
+
+  .back-button:hover, #restart-button:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+  .back-button { left: 20px; }
+  #restart-button { right: 20px; }
+
+  .next-button, #restart-button, .back-button {
+    position: fixed;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    z-index: 20;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: 2rem;
+    color: white;
+    font-weight: bold;
+    border: 4px solid #fff;
+  }
+  .next-button { top: 20px; right: 20px; background: linear-gradient(135deg, #e0aaff, #aa22ff); }
+  #restart-button { top: 50%; left: 10%; transform: translateX(-50%); background: linear-gradient(135deg, #e0aaff, #aa22ff); }
+  .back-button { top: 20px; left: 20px; background: linear-gradient(135deg, #e0aaff, #aa22ff); }
+  .next-button:active, #restart-button:active, .back-button:active { transform: scale(0.9) translateX(-50%); box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+
+  #cloud1 { background-image: url('Nuvemprivada.png'); }
+  #cloud2 { background-image: url('Nuvempublica.png'); }
+
+</style>
+</head>
+<body>
+
+<audio id="soundMusic" src="robomusica.mp3"></audio>
+<audio id="soundPhoto" src="robofoto.mp3"></audio>
+<audio id="soundGame" src="robojogo.mp3"></audio>
+
+<a href="jogos.html" class="back-button" aria-label="Voltar">⬅</a>
+<button id="restart-button">⟳</button>
+
+<div id="game-layout">
+  <div id="items-container">
+    <div class="item" id="music" draggable="true"><img src="musica2.png" alt="Ícone de Música"></div>
+    <div class="item" id="photo" draggable="true"><img src="foto2.png" alt="Ícone de Foto"></div>
+    <div class="item" id="game" draggable="true"><img src="jogo2.png" alt="Ícone de Jogo"></div>
+  </div>
+  <div class="cloud" id="cloud1"></div>
+  <div class="cloud" id="cloud2"></div>
+  <div class="gif-container gif1">
+    <img id="gifMusic1" src="robodanca (3).gif">
+    <img id="gifPhoto1" src="robofoto.gif">
+    <img id="gifGame1" src="robojogo.gif">
+  </div>
+  <div class="gif-container gif2">
+    <img id="gifMusic2_1" src="robodanca (3).gif">
+    <img id="gifMusic2_2" src="robodanca (3).gif">
+    <img id="gifMusic2_3" src="robodanca (3).gif">
+    <img id="gifPhoto2_1" src="robofoto.gif">
+    <img id="gifPhoto2_2" src="robofoto.gif">
+    <img id="gifPhoto2_3" src="robofoto.gif">
+    <img id="gifGame2_1" src="robojogo.gif">
+    <img id="gifGame2_2" src="robojogo.gif">
+    <img id="gifGame2_3" src="robojogo.gif">
+  </div>
+</div>
+
+<canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;"></canvas>
+
+<script>
+const items = document.querySelectorAll('.item');
+const clouds = [document.getElementById('cloud1'), document.getElementById('cloud2')];
+
+const gifs = {
+  music: { 
+    private: [document.getElementById('gifMusic1')], 
+    public: [
+      document.getElementById('gifMusic2_1'),
+      document.getElementById('gifMusic2_2'),
+      document.getElementById('gifMusic2_3')
+    ] 
+  },
+  photo: { 
+    private: [document.getElementById('gifPhoto1')], 
+    public: [
+      document.getElementById('gifPhoto2_1'),
+      document.getElementById('gifPhoto2_2'),
+      document.getElementById('gifPhoto2_3')
+    ] 
+  },
+  game: { 
+    private: [document.getElementById('gifGame1')], 
+    public: [
+      document.getElementById('gifGame2_1'),
+      document.getElementById('gifGame2_2'),
+      document.getElementById('gifGame2_3')
+    ] 
+  }
+};
+
+let sequence = [], usedInCloud = {music:{}, photo:{}, game:{}}, currentStep = 0;
+let confettiInterval;
+
+function generateSequence() {
+  const elements = ['music','photo','game'];
+  const cloudsOrder = [0,1,0,1,0,1];
+  sequence = cloudsOrder.map(cloudIndex=>{
+    let available = elements.filter(e=>!usedInCloud[e][cloudIndex]);
+    let elem = available[Math.floor(Math.random()*available.length)];
+    usedInCloud[elem][cloudIndex] = true;
+    return {cloud: cloudIndex, element: elem};
+  });
+}
+
+function resetGifs() {
+  Object.values(gifs).forEach(obj=>{
+    obj.private.forEach(g=>g.style.display='none');
+    obj.public.forEach(g=>g.style.display='none');
+  });
+}
+
+const itemsById = {};
+items.forEach(item => itemsById[item.id] = item);
+
+function showCurrentElement() {
+  clouds.forEach(c=>c.textContent='');
+  const step = sequence[currentStep];
+  const cloud = clouds[step.cloud];
+  const clone = itemsById[step.element].cloneNode(true);
+  clone.style.position = 'absolute';
+  clone.style.top = '50%';
+  clone.style.left = '50%';
+  clone.style.transform = 'translate(-50%, -50%)';
+  cloud.appendChild(clone);
+}
+
+items.forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', item.id);
+  });
+});
+
+clouds.forEach(cloud=>{
+  cloud.addEventListener('dragover', e => e.preventDefault());
+  cloud.addEventListener('drop', e => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData('text/plain');
+    const step = sequence[currentStep];
+    if(clouds[step.cloud] === cloud && id === step.element){
+      showGif(step.element, step.cloud);
+      currentStep++;
+      if(currentStep < sequence.length) showCurrentElement();
+      else showConfetti();
+    }
+  });
+});
+
+function showGif(element, cloudIndex){
+  resetGifs();
+
+  if(cloudIndex===1) gifs[element].public.forEach(g=>g.style.display='block');
+  else gifs[element].private[0].style.display='block';
+
+  const soundMap = {
+    music: document.getElementById('soundMusic'),
+    photo: document.getElementById('soundPhoto'),
+    game: document.getElementById('soundGame')
+  };
+
+  Object.values(soundMap).forEach(audio => { audio.pause(); audio.currentTime = 0; });
+
+  const audio = soundMap[element];
+  if(audio){ audio.loop = true; audio.play(); }
+}
+
+function showConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const confetti = [];
+  for(let i=0;i<150;i++){
+    confetti.push({
+      x: Math.random()*canvas.width,
+      y: Math.random()*canvas.height - canvas.height,
+      r: Math.random()*6+2,
+      d: Math.random()*150,
+      color: `hsl(${Math.random()*360}, 100%, 50%)`,
+      tilt: Math.random()*10-10
+    });
+  }
+
+  function drawConfetti(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    confetti.forEach(c=>{
+      ctx.beginPath();
+      ctx.lineWidth = c.r/2;
+      ctx.strokeStyle = c.color;
+      ctx.moveTo(c.x+c.tilt+c.r/4, c.y);
+      ctx.lineTo(c.x+c.tilt, c.y+c.r);
+      ctx.stroke();
+    });
+    updateConfetti();
+  }
+
+  function updateConfetti(){
+    confetti.forEach(c=>{
+      c.y += (Math.cos(c.d)+3+c.r/2)/2;
+      c.tilt = Math.sin(c.d);
+      c.d += 0.1;
+      if(c.y>canvas.height){ c.y = -10; c.x = Math.random()*canvas.width; }
+    });
+  }
+
+  confettiInterval = setInterval(drawConfetti, 20);
+}
+
+function stopConfetti() {
+  clearInterval(confettiInterval);
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+document.getElementById('restart-button').addEventListener('click', ()=>{
+  stopConfetti();
+  restartGame();
+  Object.values({soundMusic,soundPhoto,soundGame}).forEach(a=>{a.pause();a.currentTime=0;});
+});
+
+function restartGame(){
+  currentStep = 0;
+  usedInCloud = {music:{}, photo:{}, game:{}};
+  sequence = [];
+  resetGifs();
+  clouds.forEach(c=>c.textContent='');
+  generateSequence();
+  showCurrentElement();
+}
+
+generateSequence();
+showCurrentElement();
+</script>
+<script src="/register-sw.js"></script>
+</body>
+</html>

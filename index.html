@@ -1,0 +1,110 @@
+<!DOCTYPE html> 
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tela de Início</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: url("littlecloud (2).png") no-repeat;
+            background-size: cover;
+            background-position: auto;
+            background-color: #caa1ff;
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            min-height: 90vh;
+            padding: 2rem;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .play-button {
+            background-color: #a3a7f8;
+            padding: 2.5rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            position: absolute;
+            left: 53%;
+            top: 45%;
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .play-icon {
+            width: 60px;
+            height: 60px;
+            fill: white;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .play-button:active {
+            transform: scale(0.9);
+        }
+
+        /* Engrenagens */
+        .gear {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            fill: rgb(86, 166, 241);
+            opacity: 0.9;
+            animation: spin 6s linear infinite;
+            /* Sombra adicionada */
+            filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.5));
+        }
+
+        .gear.left {
+            top: -10%;
+            left: -20%;
+        }
+
+        .gear.right {
+            top: -10%;
+            right: -20%;
+            animation-direction: reverse;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <audio id="bg-music" autoplay loop muted>
+        <source src="musicadefundo.mp3" type="audio/mp3">
+    </audio>
+
+    <!-- Engrenagens -->
+    <svg class="gear left" viewBox="0 0 24 24">
+        <path d="M19.14,12.94c0.04-0.31,0.06-0.63,0.06-0.94s-0.02-0.63-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.62l-1.92-3.32 c-0.11-0.21-0.36-0.3-0.58-0.22l-2.39,0.96c-0.5-0.38-1.05-0.7-1.66-0.94L14.5,2.81C14.47,2.58,14.27,2.42,14.04,2.42h-4 c-0.23,0-0.43,0.16-0.46,0.39l-0.36,2.47c-0.61,0.24-1.16,0.56-1.66,0.94L5.17,5.26c-0.22-0.09-0.47,0.01-0.58,0.22L2.67,8.8 c-0.11,0.21-0.07,0.48,0.12,0.62l2.03,1.58C4.78,11.37,4.75,11.69,4.75,12s0.02,0.63,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.62l1.92,3.32c0.11,0.21,0.36,0.3,0.58,0.22l2.39-0.96c0.5,0.38,1.05,0.7,1.66,0.94l0.36,2.47 c0.03,0.23,0.23,0.39,0.46,0.39h4c0.23,0,0.43-0.16,0.46-0.39l0.36-2.47c0.61-0.24,1.16-0.56,1.66-0.94l2.39,0.96 c0.22,0.09,0.47-0.01,0.58-0.22l1.92-3.32c0.11-0.21,0.07-0.48-0.12-0.62L19.14,12.94z M12,15.6c-1.99,0-3.6-1.61-3.6-3.6 s1.61-3.6,3.6-3.6s3.6,1.61,3.6,3.6S13.99,15.6,12,15.6z"/>
+    </svg>
+
+    <svg class="gear right" viewBox="0 0 24 24">
+        <path d="M19.14,12.94c0.04-0.31,0.06-0.63,0.06-0.94s-0.02-0.63-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.62l-1.92-3.32 c-0.11-0.21-0.36-0.3-0.58-0.22l-2.39,0.96c-0.5-0.38-1.05-0.7-1.66-0.94L14.5,2.81C14.47,2.58,14.27,2.42,14.04,2.42h-4 c-0.23,0-0.43,0.16-0.46,0.39l-0.36,2.47c-0.61,0.24-1.16,0.56-1.66,0.94L5.17,5.26c-0.22-0.09-0.47,0.01-0.58,0.22L2.67,8.8 c-0.11,0.21-0.07,0.48,0.12,0.62l2.03,1.58C4.78,11.37,4.75,11.69,4.75,12s0.02,0.63,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.62l1.92,3.32c0.11,0.21,0.36,0.3,0.58,0.22l2.39-0.96c0.5,0.38,1.05,0.7,1.66,0.94l0.36,2.47 c0.03,0.23,0.23,0.39,0.46,0.39h4c0.23,0,0.43-0.16,0.46-0.39l0.36-2.47c0.61-0.24,1.16-0.56,1.66-0.94l2.39,0.96 c0.22,0.09,0.47-0.01,0.58-0.22l1.92-3.32c0.11-0.21,0.07-0.48-0.12-0.62L19.14,12.94z M12,15.6c-1.99,0-3.6-1.61-3.6-3.6 s1.61-3.6,3.6-3.6s3.6,1.61,3.6,3.6S13.99,15.6,12,15.6z"/>
+    </svg>
+
+    <!-- Botão Play -->
+    <a href="home.html" class="play-button">
+        <svg class="play-icon" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+        </svg>
+    </a>
+<script src="/register-sw.js"></script>
+</body>
+</html>

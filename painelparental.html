@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Parental</title>
+<link rel="manifest" href="/manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Fredoka', sans-serif;
+    background: linear-gradient(135deg, #fbc2eb, #a6c0fe);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding-top: 50px;
+    color: #4a148c;
+    overflow-x: hidden;
+  }
+  h1 { text-align:center; color:#fff; font-size:2.5rem; margin-bottom:30px; text-shadow:2px 2px 6px rgba(0,0,0,0.3);}
+  h2 { color:#8862d8; margin-bottom:1rem; text-shadow:1px 1px 2px rgba(0,0,0,0.1);}
+  .login-container, .panel-container {
+    background: rgba(255,255,255,0.9);
+    padding: 2rem;
+    border-radius: 25px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.2);
+    text-align:center;
+    width:90%;
+    max-width:500px;
+    margin-bottom:20px;
+    animation:bounceIn 0.8s ease;
+  }
+  input[type="password"], input[type="number"] {
+    padding:0.7rem; font-size:1rem; margin-bottom:1rem;
+    width:80%; max-width:250px;
+    border:3px solid #f2e2ff; border-radius:15px;
+    outline:none; transition:0.3s; background-color:#f8f0ff;
+    text-align:center; color:#4a148c;
+  }
+  input:focus { border-color:#d1b8ff; box-shadow:0 0 8px rgba(209,184,255,0.8);}
+  button {
+    padding:0.8rem 2.5rem; font-size:1rem; border-radius:15px; border:none;
+    background:linear-gradient(135deg,#a6c0fe,#fbc2eb); color:white; cursor:pointer;
+    margin-top:10px; font-weight:bold; transition:transform 0.2s, box-shadow 0.2s;
+    text-shadow:1px 1px 2px rgba(0,0,0,0.2);
+  }
+  button:hover { transform:scale(1.05); box-shadow:0 6px 15px rgba(0,0,0,0.3);}
+  button:active { transform:scale(0.95);}
+  .game-history {
+    background:#f0f8ff; padding:1rem; margin:8px 0;
+    border-radius:15px; box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    text-align:left; border-left:6px solid #a6c0fe;
+  }
+  #feedback { color:#ff5252; font-weight:bold; margin-top:10px; animation:fadeIn 0.5s;}
+  .back-button { position:absolute; top:20px; left:20px; width:60px; height:60px; border-radius:50%;
+    background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.2);
+    text-decoration:none; transition:transform 0.2s;
+  }
+  .back-button:hover { transform:scale(1.1);}
+  .back-button-icon { font-size:2rem; color:#8862d8;}
+  .message-box {
+    position: fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background: rgba(255,255,255,0.95); padding:2rem; border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25); text-align:center; z-index:1000;
+    display:none; animation:fadeIn 0.3s ease;
+  }
+  .message-box p { margin:0 0 1rem 0; color:#333; }
+  .message-box button { padding:0.5rem 1.5rem;}
+  .lock-screen {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center;
+    z-index:2000; display:none;
+  }
+  .lock-box {
+    background:#fff; padding:2rem; border-radius:25px; text-align:center;
+    box-shadow:0 8px 20px rgba(0,0,0,0.3); max-width:400px; width:90%;
+  }
+  .lock-box h2 { color:#8862d8; margin-bottom:1rem; }
+</style>
+</head>
+<body>
+
+<a href="telainicial.html" class="back-button">
+  <span class="back-button-icon">⬅</span>
+</a>
+
+<h1>Painel Parental</h1>
+
+<div class="login-container" id="login-container">
+  <p>Digite a senha para acessar:</p>
+  <input type="password" id="password" placeholder="Senha">
+  <br>
+  <button onclick="checkPassword()">Entrar</button>
+  <p id="feedback"></p>
+</div>
+
+<div class="panel-container" id="panel" style="display:none;">
+  <h2>Controle Parental</h2>
+  <p>Defina o tempo máximo de jogo (minutos):</p>
+  <input type="number" id="timeLimit" placeholder="Ex: 30">
+  <button onclick="setTimeLimit()">Definir Limite</button>
+
+  <h2>Histórico de Jogos Jogados:</h2>
+  <div id="gameHistory"></div>
+  <button onclick="resetHistory()">Reiniciar Histórico</button>
+
+  <h2>Alterar Senha</h2>
+  <input type="password" id="newPassword" placeholder="Nova senha">
+  <button onclick="changePassword()">Salvar Nova Senha</button>
+</div>
+
+<div class="message-box" id="message-box">
+  <p id="message-text"></p>
+  <button onclick="hideMessage()">OK</button>
+</div>
+
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-box">
+    <h2>Tempo esgotado!</h2>
+    <p>Digite a senha para continuar jogando:</p>
+    <input type="password" id="unlockPassword" placeholder="Senha">
+    <br>
+    <button onclick="unlockGame()">Desbloquear</button>
+    <p id="unlockFeedback" style="color:red;font-weight:bold;"></p>
+  </div>
+</div>
+
+<script>
+function showMessage(message) {
+  document.getElementById("message-text").textContent = message;
+  document.getElementById("message-box").style.display = "block";
+}
+function hideMessage() { document.getElementById("message-box").style.display = "none"; }
+
+if (!localStorage.getItem("parentPassword")) {
+  localStorage.setItem("parentPassword","1234");
+}
+
+function checkPassword() {
+  const input = document.getElementById('password').value;
+  const savedPassword = localStorage.getItem("parentPassword");
+  const feedback = document.getElementById('feedback');
+  if(input === savedPassword){
+    document.getElementById('login-container').style.display='none';
+    document.getElementById('panel').style.display='block';
+    loadGameHistory();
+  } else { feedback.textContent="Senha incorreta!"; }
+}
+
+function setTimeLimit() {
+  const minutes = parseInt(document.getElementById('timeLimit').value);
+  if(!isNaN(minutes)&&minutes>0){
+    localStorage.setItem('gameLimit',minutes*60);
+    localStorage.setItem('gameStart',Date.now());
+    showMessage(`Tempo de jogo definido para ${minutes} minutos.`);
+    startTimer();
+  } else { showMessage("Digite um valor válido em minutos."); }
+}
+
+function startTimer(){
+  clearInterval(window.limitChecker);
+  window.limitChecker=setInterval(()=>{
+    const gameLimit=parseInt(localStorage.getItem('gameLimit'))||0;
+    const gameStart=parseInt(localStorage.getItem('gameStart'))||0;
+    if(gameLimit && gameStart){
+      const elapsed=(Date.now()-gameStart)/1000;
+      if(elapsed>=gameLimit){
+        clearInterval(window.limitChecker);
+        document.getElementById("lock-screen").style.display="flex";
+      }
+    }
+  },1000);
+}
+
+function unlockGame(){
+  const input=document.getElementById("unlockPassword").value;
+  const savedPassword=localStorage.getItem("parentPassword");
+  if(input===savedPassword){
+    document.getElementById("lock-screen").style.display="none";
+    localStorage.setItem('gameStart',Date.now());
+    startTimer();
+  } else {
+    document.getElementById("unlockFeedback").textContent="Senha incorreta!";
+  }
+}
+
+function loadGameHistory(){
+  const historyDiv=document.getElementById("gameHistory");
+  historyDiv.innerHTML="";
+  const historico=JSON.parse(localStorage.getItem("gameHistory"))||{};
+  if(Object.keys(historico).length===0){
+    historyDiv.innerHTML="<p>Nenhum jogo jogado ainda.</p>";
+  } else {
+    for(let jogo in historico){
+      const div=document.createElement("div");
+      div.className="game-history";
+      // Mostra apenas o número de vezes jogadas
+      div.textContent=`${jogo}: ${historico[jogo].plays} vez(es)`;
+      historyDiv.appendChild(div);
+    }
+  }
+}
+
+function resetHistory(){
+  localStorage.removeItem("gameHistory");
+  loadGameHistory();
+  showMessage("Histórico reiniciado.");
+}
+
+function changePassword(){
+  const newPass=document.getElementById("newPassword").value;
+  if(newPass.length<3){ showMessage("A senha precisa ter pelo menos 3 caracteres."); return; }
+  localStorage.setItem("parentPassword",newPass);
+  showMessage("Senha alterada com sucesso!");
+}
+
+// Inicia timer se já existir limite
+if(localStorage.getItem('gameLimit') && localStorage.getItem('gameStart')){
+  startTimer();
+}
+</script>
+<script src="/register-sw.js"></script>
+</body>
+</html>

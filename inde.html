@@ -1,0 +1,114 @@
+Melhore esse jogo, deixe como um jogo profissional <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Edutainment Nuvem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <audio id="audio-player"></audio>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+    <div id="login" class="screen active">
+        <h1>Entrar na Nuvem</h1>
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Email"><br>
+            <input type="password" id="password" placeholder="Senha">
+        </div>
+        <button class="btn" onclick="loginEmail()">Entrar</button>
+        <button class="btn" onclick="registerEmail()">Cadastrar</button>
+        <button class="btn" onclick="goTo('menu')">Entrar com Google</button>
+        <p id="auth-feedback" class="feedback" style="color: red;"></p>
+    </div>
+
+    <div id="home" class="screen">
+        <h1>☁️ Bem-vindo ao Edutainment Nuvem</h1>
+        <p>Aprenda computação em nuvem brincando!</p>
+        <button class="btn" onclick="goTo('menu')">Começar 🚀</button>
+        <img src="img/mascote.png" class="mascote" id="mascote-home">
+    </div>
+
+    <div id="menu" class="screen">
+        <h1>Escolha um jogo 🎮</h1>
+        <button class="btn" onclick="goTo('dragdrop')">Arraste Arquivos</button>
+        <button class="btn" onclick="goTo('colors')">Conecte Cores</button>
+        <button class="btn" onclick="goTo('locks')">Proteja a Nuvem</button>
+        <button class="btn" onclick="goTo('parent')">Controle Parental</button>
+        <button class="btn btn-back" onclick="logout()">Sair</button>
+    </div>
+
+    <div id="parent" class="screen">
+        <h1>Controle Parental</h1>
+        <p id="stats">Carregando estatísticas...</p>
+        <button class="btn btn-back" onclick="goTo('menu')">⬅️ Voltar</button>
+    </div>
+
+    <div id="dragdrop" class="screen">
+        <h1>Arraste arquivos para a nuvem</h1>
+        <div class="game-container">
+            <div id="files">
+                <img src="musica.png" id="music" draggable="true" alt="Ícone de música">
+                <img src="img/photo.png" id="photo" draggable="true" alt="Ícone de foto">
+                <img src="img/video.png" id="video" draggable="true" alt="Ícone de vídeo">
+            </div>
+            <div id="cloud-target"></div>
+            <p id="dragdrop-feedback" class="feedback">🎉 Todos salvos!</p>
+        </div>
+        <button class="btn btn-back" onclick="goTo('menu')">⬅️ Voltar</button>
+    </div>
+
+    <div id="colors" class="screen">
+        <h1>Conecte o Computador à Nuvem</h1>
+        <div class="game-container">
+            <div class="circuit-container">
+                <img src="img/computer.png" alt="Ícone de computador" style="width: 100px;">
+                <div id="cables">
+                    <div class="cable" data-color-id="blue" data-rotation="0" onclick="rotateCable(this)"></div>
+                    <div class="cable" data-color-id="red" data-rotation="0" onclick="rotateCable(this)"></div>
+                    <div class="cable" data-color-id="green" data-rotation="0" onclick="rotateCable(this)"></div>
+                </div>
+                <img src="img/cloud.png" alt="Ícone de nuvem" style="width: 100px;">
+            </div>
+            <p id="colors-feedback" class="feedback">⚡ Conexão completa!</p>
+        </div>
+        <button class="btn btn-back" onclick="goTo('menu')">⬅️ Voltar</button>
+    </div>
+
+    <div id="locks" class="screen">
+        <h1>Proteja as nuvens</h1>
+        <div class="game-container">
+            <div id="clouds-container">
+                <div class="cloud-item" data-size="small">
+                    <img src="img/cloud_small.png" alt="Nuvem pequena">
+                </div>
+                <div class="cloud-item" data-size="medium">
+                    <img src="img/cloud_medium.png" alt="Nuvem média">
+                </div>
+                <div class="cloud-item" data-size="large">
+                    <img src="img/cloud_large.png" alt="Nuvem grande">
+                </div>
+            </div>
+            <div id="locks-container">
+                <div class="lock-item" data-size="small">
+                    <img src="img/lock_small.png" draggable="true" alt="Cadeado pequeno">
+                </div>
+                <div class="lock-item" data-size="medium">
+                    <img src="img/lock_medium.png" draggable="true" alt="Cadeado médio">
+                </div>
+                <div class="lock-item" data-size="large">
+                    <img src="img/lock_large.png" draggable="true" alt="Cadeado grande">
+                </div>
+            </div>
+            <p id="locks-feedback" class="feedback">🔐 Todas protegidas!</p>
+        </div>
+        <button class="btn btn-back" onclick="goTo('menu')">⬅️ Voltar</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

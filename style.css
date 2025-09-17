@@ -1,0 +1,243 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: #49cff7; /* azul de fundo */
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* Container central */
+.container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  text-align: center;
+}
+
+/* Título */
+.titulo {
+  font-size: clamp(60px, 10vw, 120px); /* maior que antes */
+  font-weight: bold;
+  color: #a020f0;
+  text-shadow: 5px 5px 0px #000;
+  margin-top: 3vh;
+}
+
+body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background: #e0f2fe;
+            color: #1e3a8a;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 500px;
+            box-sizing: border-box;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #4a5568;
+            font-size: 1rem;
+        }
+
+        button.btn {
+            margin: 0.75rem;
+            padding: 0.8rem 1.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: transform 0.2s ease-in-out, background-color 0.2s;
+        }
+
+        button.btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        button.btn-back {
+            background: #e2e8f0;
+            color: #4a5568;
+            box-shadow: none;
+            padding: 0.6rem 1.5rem;
+        }
+
+        button.btn-back:hover {
+            background: #cbd5e1;
+        }
+
+        .input-group {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        input {
+            width: 80%;
+            padding: 0.8rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .feedback {
+            margin-top: 1.5rem;
+            font-weight: bold;
+            color: #16a34a;
+            display: none;
+            font-size: 1.2rem;
+        }
+
+        .mascote {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 120px;
+            transition: 0.3s;
+        }
+
+        .mascote.happy {
+            filter: drop-shadow(0 0 12px #22c55e);
+            transform: scale(1.05);
+        }
+
+        .mascote.sad {
+            filter: grayscale(1);
+            transform: rotate(-5deg);
+        }
+
+        .mascote.speak {
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* Estilos dos Jogos */
+        .game-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #dragdrop #files img {
+            width: 60px;
+            margin: 1rem;
+            cursor: grab;
+            transition: transform 0.2s;
+        }
+        #dragdrop #files img:hover {
+            transform: translateY(-5px);
+        }
+
+        #dragdrop #cloud-target {
+            width: 150px;
+            height: 100px;
+            background-image: url('img/cloud.png'); /* Caminho para a imagem da nuvem */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin: 2rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 🎨 Jogo de Cores */
+        #colors .game-container {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .circuit-container {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .cable {
+            width: 30px;
+            height: 150px;
+            margin: 0 1rem;
+            border-radius: 15px;
+            transition: transform 0.3s ease-in-out, background-color 0.3s;
+            cursor: pointer;
+        }
+
+        /* Cores Iniciais */
+        .cable[data-color-id="blue"] { background-color: #3b82f6; }
+        .cable[data-color-id="red"] { background-color: #ef4444; }
+        .cable[data-color-id="green"] { background-color: #22c55e; }
+
+        /* Cores de Conexão */
+        .cable.connected { background-color: #16a34a; }
+
+        #locks #clouds-container, #locks #locks-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        
+        #locks .cloud-item, #locks .lock-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 1rem;
+        }
+
+        #locks .cloud-item img, #locks .lock-item img {
+            width: 80px;
+        }
+
+        #locks .lock-item img {
+            cursor: grab;
+        }
+
+        body {
+  background-image: url('layout.png');
+  background-size: cover;      /* Faz a imagem cobrir toda a tela */
+  background-position: center; /* Centraliza a imagem */
+  background-repeat: no-repeat;/* Evita repetição */
+}

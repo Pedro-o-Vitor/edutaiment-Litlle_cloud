@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conectando e Protegendo a Nuvem</title>
+<link rel="manifest" href="/manifest.json">
+<style>
+:root{
+  --bg-color:#e9f5ff;
+  --primary:#673ab7;
+  --secondary:#ffd740;
+  --text:#1a0a2e;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(180deg,#e9f5ff,#ffffff);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:2rem;
+}
+
+
+.game-board{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:4rem;
+  position:relative;
+}
+
+h1.game-title{
+  color:var(--primary);
+  font-size:2.4rem;
+  margin:0;
+  text-align:center;
+  text-shadow:0 0 20px rgba(100,0,150,0.5);
+}
+
+.cloud-section, .lock-section{
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  gap:2rem;
+  width:200%;
+  pointer-events: none;
+}
+
+.cloud-container, .lock-container{
+  pointer-events: auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  transition: transform .2s ease-in-out, box-shadow .25s ease-in-out;
+  border-radius:12px;
+  padding:0.25rem;
+  position:relative;
+}
+
+.cloud-container{ z-index:10; }
+
+.cloud-container.active{ 
+  transform: scale(1.07); 
+  box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { box-shadow: 0 0 0 rgba(100,0,150,0.5); }
+  to { box-shadow: 0 0 20px rgba(100,0,150,0.8); }
+}
+
+.cloud-container.match-effect {
+    animation: correct-drop 0.5s ease-out;
+}
+
+@keyframes correct-drop {
+    0% { transform: scale(1.0); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1.07); }
+}
+
+.cloud-container.moving { animation-duration: 25s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-play-state: running; }
+.cloud-container.sway-1 { animation-name: sway-1; }
+@keyframes sway-1 { 0%{transform:translate(0,0);}25%{transform:translate(-100px,-50px);}50%{transform:translate(150px,-80px);}75%{transform:translate(75px,-120px);}100%{transform:translate(0,0);} }
+.cloud-container.sway-2 { animation-name: sway-2; }
+@keyframes sway-2 { 0%{transform:translate(0,0);}25%{transform:translate(120px,-60px);}50%{transform:translate(-90px,-100px);}75%{transform:translate(-150px,-40px);}100%{transform:translate(0,0);} }
+.cloud-container.sway-3 { animation-name: sway-3; }
+@keyframes sway-3 { 0%{transform:translate(0,0);}25%{transform:translate(-80px,-100px);}50%{transform:translate(100px,-150px);}75%{transform:translate(50px,-90px);}100%{transform:translate(0,0);} }
+
+.cloud-icon.w-40{ width:160px; }
+.cloud-icon.w-48{ width:192px; }
+.cloud-icon.w-44{ width:176px; }
+.cloud-icon.w-36{ width:144px; }
+.cloud-icon.w-56{ width:224px; }
+
+.lock-container{ width:96px; height:auto; cursor:grab; }
+.lock-icon{ width:96px; height:auto; user-drag:none; -webkit-user-drag:none; }
+
+.lock-container.is-dragging{
+  cursor:grabbing;
+  opacity:0.85;
+  transform:scale(1.05);
+  filter: drop-shadow(0 0 10px var(--primary));
+}
+.lock-container.matched{ pointer-events:none; opacity:0.9; z-index:20; }
+.lock-container.wrong-drop { animation: shake 0.5s; }
+@keyframes shake { 0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);} }
+
+.game-stats { position:absolute; top:2rem; left:2rem; font-size:1.5rem; font-weight:bold; color:var(--primary); text-shadow:1px 1px 2px rgba(0,0,0,0.1); z-index:100; }
+.level-display { font-size:1.8rem; }
+
+.message-box{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); padding:1.25rem 2rem; background:var(--primary); color:#fff; border-radius:12px; box-shadow:0 6px 24px rgba(0,0,0,0.3); font-weight:700; display:none; z-index:300; text-align:center; }
+
+.timer-display { position: absolute; top:2rem; left:50%; transform:translateX(-50%); background-color: var(--primary); color:#fff; font-size:2.2rem; font-weight:bold; width:110px; height:110px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(0,0,0,0.2); border:4px solid var(--secondary); z-index:100; }
+
+#end-game-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); backdrop-filter:blur(5px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; z-index:500; animation:fadeIn 0.5s ease-out; display:none; }
+@keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
+#end-game-modal h2 { font-size:3rem; color:var(--primary); margin-bottom:1rem; }
+#end-game-modal p { font-size:1.5rem; color:var(--text); margin-bottom:2rem; }
+.action-btn { padding:1rem 2rem; font-size:1.25rem; font-weight:bold; color:#fff; background-color:var(--primary); border:none; border-radius:10px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s, background-color 0.2s; }
+.action-btn:hover { background-color:#5d2da3; transform:translateY(-2px); }
+
+.next-level-btn, #back-level1-btn {
+  position:absolute; top:2rem; right:2rem; z-index:150; width:70px; height:70px; border-radius:50%; font-size:3rem; line-height:1; background-color:var(--secondary); color:var(--primary); border:4px solid var(--primary); box-shadow:0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s, background-color 0.2s; cursor:pointer; display:none;
+}
+.next-level-btn:hover, #back-level1-btn:hover { transform:scale(1.1); background-color:#ffc107; }
+ .back-button { top: 20px; left: 20px; background: linear-gradient(135deg, #e0aaff, #aa22ff);}
+  .next-btn, .restart-btn, .back-button {
+            position: fixed;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            z-index: 20;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-size: 2rem;
+            color: white;
+            font-weight: bold;
+            border: 4px solid #fff;
+        }
+  .restart-btn { top: 50%; left: 10%; transform: translateX(-50%); background: linear-gradient(135deg, #e0aaff, #aa22ff); }
+
+</style>
+</head>
+<body>
+<a href="jogos.html" class="back-button">⬅</a>
+<button class="restart-btn" id="restart-btn-global">⟳</button>
+
+
+<div id="start-screen" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg,#fbc2eb,#a6c0fe);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+">
+    <h1 style="
+        color: #fff;
+        font-size: 2.5rem;
+        text-align: center;
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+        margin-bottom: 20px;
+    ">Bem-vindo ao Proteger Nuvens</h1>
+    <button id="start-game-btn" style="
+        padding:0.8rem 2.5rem;
+        font-size:1rem;
+        border-radius:100px;
+        border:none;
+        background: linear-gradient(135deg,#5c8dff,#ff60d2);
+        color:white;
+        cursor:pointer;
+        font-weight:bold;
+        text-shadow:1px 1px 2px rgba(0,0,0,0.2);
+    ">Começar</button>
+</div>
+
+
+<div class="game-board" style="display:flex;">
+  <div class="game-stats">
+  </div>
+
+  
+  
+  <h1 class="game-title">Conecte os cadeados de dados às nuvens seguras!</h1>
+
+  <div id="cloud-section" class="cloud-section">
+    <div class="cloud-container" data-color="blue">
+      <img src="nuvemazul (3).png" alt="Nuvem azul" class="cloud-icon w-40">
+    </div>
+    <div class="cloud-container" data-color="orange">
+      <img src="nuvemlaranja (2).png" alt="Nuvem laranja" class="cloud-icon w-48">
+    </div>
+    <div class="cloud-container" data-color="yellow">
+      <img src="nuvemamarela (2).png" alt="Nuvem amarela" class="cloud-icon w-44">
+    </div>
+    <div class="cloud-container" data-color="green">
+      <img src="nuvemverde (2).png" alt="Nuvem verde" class="cloud-icon w-36">
+    </div>
+    <div class="cloud-container" data-color="purple">
+      <img src="nuvemroxa (2).png" alt="Nuvem lilás" class="cloud-icon w-56">
+    </div>
+  </div>
+
+  <div id="lock-section" class="lock-section">
+    <div class="lock-container" id="cadeado-green" draggable="true" data-color="green">
+      <img src="cadeaverde.png" alt="Cadeado verde" class="lock-icon" draggable="false">
+    </div>
+    <div class="lock-container" id="cadeado-blue" draggable="true" data-color="blue">
+      <img src="cadeazul.png" alt="Cadeado azul" class="lock-icon" draggable="false">
+    </div>
+    <div class="lock-container" id="cadeado-purple" draggable="true" data-color="purple">
+      <img src="cadearoxo.png" alt="Cadeado lilás" class="lock-icon" draggable="false">
+    </div>
+    <div class="lock-container" id="cadeado-orange" draggable="true" data-color="orange">
+      <img src="cadelaranja.png" alt="Cadeado laranja" class="lock-icon" draggable="false">
+    </div>
+    <div class="lock-container" id="cadeado-yellow" draggable="true" data-color="yellow">
+      <img src="cadeamarelo.png" alt="Cadeado amarelo" class="lock-icon" draggable="false">
+    </div>
+  </div>
+
+  
+ 
+</div>
+
+<div id="message-box" class="message-box"></div>
+
+<div id="end-game-modal" class="end-game-modal"></div>
+
+<div class="lock-screen" id="lock-screen" style="display:none;">
+  <div class="lock-box">
+    <h2>Tempo esgotado!</h2>
+    <p>Digite a senha para continuar jogando:</p>
+    <input type="password" id="unlockPassword" placeholder="Senha">
+    <br>
+    <button onclick="unlockGame()">Desbloquear</button>
+    <p id="unlockFeedback" style="color:red;font-weight:bold;"></p>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const cloudContainers = Array.from(document.querySelectorAll('.cloud-container'));
+  const lockContainers = Array.from(document.querySelectorAll('.lock-container'));
+  const messageBox = document.getElementById('message-box');
+  const timerEl = document.getElementById('timer');
+  const levelDisplay = document.getElementById('level-display');
+  const gameBoard = document.querySelector('.game-board');
+  const endGameModal = document.getElementById('end-game-modal');
+  const endGameTitle = document.getElementById('end-game-title');
+  const endGameMessage = document.getElementById('end-game-message');
+  const actionBtn = document.getElementById('action-btn');
+  const nextLevelBtn = document.getElementById('next-level-btn');
+  const backToLevel1Btn = document.getElementById('back-level1-btn');
+
+  const bgSound = new Audio('sounds/bg.mp3');           
+  bgSound.loop = true;                                  
+  const soundSuccess = new Audio('cadeadocorreto.mp3'); 
+  const soundError = new Audio('cadeadoerrado.mp3');     
+  const soundTimeUp = new Audio('tempoesgotado.mp3');   
+  const soundWin = new Audio('sounds/win.wav');         
+  const soundLose = new Audio('stempoesgotado.mp3');    
+
+  let dragItem = null;
+  let matchedCount = 0;
+  let time = 30;
+  let timerInterval = null;
+  let currentLevel = 1;
+
+  const startGame = (level) => {
+    bgSound.play();  
+
+    currentLevel = level;
+    matchedCount = 0;
+    time = 30;
+    timerEl.textContent = `${time}s`;
+    levelDisplay.textContent = `Nível ${currentLevel}`;
+    endGameModal.style.display = 'none';
+    nextLevelBtn.style.display = 'none';
+    backToLevel1Btn.style.display = currentLevel === 2 ? 'block' : 'none';
+    gameBoard.style.display = 'flex';
+
+    const gameName = "Proteger nuvens";
+    let historico = JSON.parse(localStorage.getItem("gameHistory")) || {};
+    if (!historico[gameName]) historico[gameName] = { plays: 0 };
+    historico[gameName].plays += 1;
+    localStorage.setItem("gameHistory", JSON.stringify(historico));
+
+    lockContainers.forEach(lock => {
+      lock.style.position = '';
+      lock.style.left = '';
+      lock.style.top = '';
+      lock.style.transform = '';
+      lock.style.transition = '';
+      lock.style.pointerEvents = 'auto';
+      lock.setAttribute('draggable', 'true');
+      lock.classList.remove('matched', 'is-dragging', 'wrong-drop');
+      document.getElementById('lock-section').appendChild(lock);
+    });
+
+    cloudContainers.forEach((cloud, index) => {
+      cloud.classList.remove('matched', 'match-effect', 'moving', 'sway-1', 'sway-2', 'sway-3');
+      if (currentLevel === 2) {
+        cloud.classList.add('moving');
+        if (index % 3 === 0) cloud.classList.add('sway-1');
+        else if (index % 3 === 1) cloud.classList.add('sway-2');
+        else cloud.classList.add('sway-3');
+      }
+    });
+
+    shuffleLocks();
+    startTimer();
+  };
+
+  const showMessage = (text, time=1400) => {
+    messageBox.textContent = text;
+    messageBox.style.display = 'block';
+    setTimeout(()=> messageBox.style.display = 'none', time);
+  };
+
+  const startTimer = () => {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      time--;
+      timerEl.textContent = `${time}s`;
+      if(time <=0) handleGameOver(false);
+    },1000);
+  };
+
+  const stopTimer = () => clearInterval(timerInterval);
+
+  const handleGameOver = (isWin) => {
+    stopTimer();
+    setTimeout(() => {
+      if(isWin){
+        if(currentLevel === 2){
+          showMessage('Você completou o jogo!');
+          soundWin.play();
+          bgSound.pause();
+        } else {
+          nextLevelBtn.style.display = 'block';
+        }
+      } else {
+        endGameModal.style.display = 'flex';
+        endGameTitle.textContent = 'Fim de Jogo!';
+        endGameMessage.textContent = 'O tempo acabou. Tente novamente!';
+        actionBtn.textContent = 'Tentar Novamente';
+        actionBtn.style.display = 'block';
+        soundTimeUp.play();
+        soundLose.play();
+        bgSound.pause();
+      }
+    }, 700);
+  };
+
+  const shuffleLocks = () => {
+    const lockSection = document.getElementById('lock-section');
+    for (let i=lockSection.children.length;i>0;i--){
+      lockSection.appendChild(lockSection.children[Math.floor(Math.random()*i)]);
+    }
+  };
+
+  lockContainers.forEach(lock=>{
+    lock.addEventListener('dragstart', e=>{
+      dragItem=lock;
+      e.dataTransfer.setData('text/plain',lock.id);
+      e.dataTransfer.effectAllowed='move';
+      setTimeout(()=>lock.classList.add('is-dragging'),0);
+    });
+    lock.addEventListener('dragend', ()=>{
+      if(dragItem) dragItem.classList.remove('is-dragging');
+      dragItem=null;
+    });
+  });
+
+  cloudContainers.forEach(cloud=>{
+    cloud.addEventListener('dragover', e=>{
+      e.preventDefault();
+      if(!cloud.classList.contains('matched')) cloud.classList.add('active');
+    });
+    cloud.addEventListener('dragleave',()=> cloud.classList.remove('active'));
+    cloud.addEventListener('drop', e=>{
+      e.preventDefault();
+      cloud.classList.remove('active');
+      const id = e.dataTransfer.getData('text/plain');
+      const dragged = document.getElementById(id);
+      if(!dragged) return;
+      const dragColor = dragged.dataset.color;
+      const dropColor = cloud.dataset.color;
+
+      if(dragColor === dropColor){
+        soundSuccess.play();
+        matchedCount++;
+        showMessage('Conectado!');
+        cloud.appendChild(dragged);
+        dragged.style.position='relative';
+        dragged.style.left='0';
+        dragged.style.top='0';
+        dragged.style.transform='scale(0.6)';
+        dragged.style.transition='all 0.45s ease-in-out';
+        dragged.style.pointerEvents='none';
+        dragged.setAttribute('draggable','false');
+        dragged.classList.add('matched');
+        cloud.classList.add('matched','match-effect');
+        cloud.classList.remove('moving','sway-1','sway-2','sway-3');
+
+        if(matchedCount === cloudContainers.length){
+          handleGameOver(true);
+        }
+      } else {
+        dragged.classList.add('wrong-drop');
+        setTimeout(()=> dragged.classList.remove('wrong-drop'),500);
+        soundError.play();
+      }
+    });
+  });
+
+  // Iniciar o jogo automaticamente
+  startGame(1);
+
+  actionBtn.addEventListener('click', ()=>{
+    if(actionBtn.textContent==='Tentar Novamente') startGame(currentLevel);
+    else if(actionBtn.textContent==='Jogar Novamente') startGame(1);
+  });
+
+  nextLevelBtn.addEventListener('click', ()=> startGame(currentLevel+1));
+  backToLevel1Btn.addEventListener('click', ()=> startGame(1));
+});
+
+function startTimerGame(){
+  clearInterval(window.limitCheckerGame);
+  window.limitCheckerGame = setInterval(()=>{
+    const gameLimit = parseInt(localStorage.getItem('gameLimit')) || 0;
+    const gameStart = parseInt(localStorage.getItem('gameStart')) || 0;
+    if(gameLimit && gameStart){
+      const elapsed = (Date.now() - gameStart) / 1000;
+      if(elapsed >= gameLimit){
+        clearInterval(window.limitCheckerGame);
+        const lock = document.getElementById("lock-screen");
+        if(lock) lock.style.display = "flex";
+      }
+    }
+  }, 1000);
+}
+
+function unlockGame(){
+  const input = document.getElementById("unlockPassword").value;
+  const savedPassword = localStorage.getItem("parentPassword") || "1234";
+  const feedback = document.getElementById("unlockFeedback");
+  if(input === savedPassword){
+    document.getElementById("lock-screen").style.display = "none";
+    document.getElementById("unlockPassword").value = "";
+    feedback.textContent = "";
+    localStorage.setItem('gameStart', Date.now());
+    startTimerGame();
+  } else {
+    feedback.textContent = "Senha incorreta!";
+  }
+}
+
+if(localStorage.getItem('gameLimit') && localStorage.getItem('gameStart')){
+  startTimerGame();
+}
+const startScreen = document.getElementById('start-screen');
+const startGameBtn = document.getElementById('start-game-btn');
+
+startGameBtn.addEventListener('click', () => {
+    startScreen.style.display = 'none'; // Esconde a tela de boas-vindas
+    startGame(1); // Inicia o jogo
+});
+document.addEventListener('DOMContentLoaded', () => {
+    const cloudContainers = Array.from(document.querySelectorAll('.cloud-container'));
+    const lockContainers = Array.from(document.querySelectorAll('.lock-container'));
+    const messageBox = document.getElementById('message-box');
+    const gameBoard = document.querySelector('.game-board');
+    const restartBtnGlobal = document.getElementById('restart-btn-global');
+
+    let dragItem = null;
+    let matchedCount = 0;
+    let time = 30;
+    let timerInterval = null;
+    let currentLevel = 1;
+
+    const startGame = (level) => {
+        currentLevel = level;
+        matchedCount = 0;
+        time = 30;
+        gameBoard.style.display = 'flex';
+        cloudContainers.forEach(cloud => cloud.classList.remove('matched','match-effect','moving','sway-1','sway-2','sway-3'));
+        lockContainers.forEach(lock => {
+            lock.style.position = '';
+            lock.style.left = '';
+            lock.style.top = '';
+            lock.style.transform = '';
+            lock.style.transition = '';
+            lock.style.pointerEvents = 'auto';
+            lock.setAttribute('draggable', 'true');
+            lock.classList.remove('matched', 'is-dragging', 'wrong-drop');
+            document.getElementById('lock-section').appendChild(lock);
+        });
+        shuffleLocks();
+        startTimer();
+    };
+
+    const shuffleLocks = () => {
+        const lockSection = document.getElementById('lock-section');
+        for (let i = lockSection.children.length; i > 0; i--) {
+            lockSection.appendChild(lockSection.children[Math.floor(Math.random() * i)]);
+        }
+    };
+
+    const startTimer = () => {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            time--;
+            if(time <= 0) clearInterval(timerInterval);
+        }, 1000);
+    };
+
+    // Evento do botão de reiniciar
+    restartBtnGlobal.addEventListener('click', () => {
+        startGame(currentLevel); // Reinicia o jogo no nível atual
+    });
+
+    // Inicializa o jogo
+    startGame(1);
+});
+</script>
+<script src="/register-sw.js"></script>
+</body>
+</html>

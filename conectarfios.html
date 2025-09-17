@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Conecte os Fios</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
+    <style>
+        :root {
+            --bg-color: #d1c4e9;
+            --board-color: #9575cd;
+            --dark-purple: #4a148c;
+            --line-height: 12px;
+            --dot-size: 50px;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+            overflow: hidden;
+        }
+        .carousel {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s ease-in-out;
+        }
+        .game-container {
+            min-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .game-board {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(45deg, #a770ef, #cf9bff);
+            padding: 40px;
+            border-radius: 30px;
+            max-width: 90%;
+            width: 800px;
+            height: 450px;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        .left-dots, .right-dots {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            z-index: 10;
+        }
+        .dot {
+            width: var(--dot-size);
+            height: var(--dot-size);
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 4px solid rgba(255,255,255,0.4);
+        }
+        .dot:hover { 
+            transform: scale(1.15);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+        .dot.red { background: linear-gradient(135deg, #ff6b6b, #ee5253); }
+        .dot.yellow { background: linear-gradient(135deg, #feca57, #ff9f43); }
+        .dot.green { background: linear-gradient(135deg, #1dd1a1, #10ac84); }
+        .dot.blue { background: linear-gradient(135deg, #54a0ff, #2e86de); }
+        .dot.purple { background: linear-gradient(135deg, #be2edd, #a55eea); }
+        .dot.orange { background: linear-gradient(135deg, #ff9f43, #f53b57); }
+        .dot.pink { background: linear-gradient(135deg, #ff9ff3, #f368e0); }
+        .dot.brown { background: linear-gradient(135deg, #c44569, #7a0029); }
+        .dot.connected {
+            transform: scale(1);
+            opacity: 1;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+        .cloud {
+            width: 250px;
+            margin-left: 20px;
+            animation: float 4s ease-in-out infinite;
+            z-index: 10;
+            transition: transform 0.4s ease;
+        }
+        .line {
+            position: absolute;
+            height: 12px;
+            border-radius: 12px;
+            transform-origin: 0 50%;
+            color: inherit;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 10px rgba(0,0,0,0.6);
+        }
+        .line.red { background: linear-gradient(to right, #f88070, #ff0000); color: #f88070; }
+        .line.yellow { background: linear-gradient(to right, #fff176, #ffdd00); color: #fff176; }
+        .line.green { background: linear-gradient(to right, #81c784, #00ff00); color: #81c784; }
+        .line.blue { background: linear-gradient(to right, #64b5f6, #00aaff); color: #64b5f6; }
+        .line.purple { background: linear-gradient(to right, #ba68c8, #7700ff); color: #ba68c8; }
+        .line.orange { background: linear-gradient(to right, #ffb74d, #ff6600); color: #ffb74d; }
+        .line.pink { background: linear-gradient(to right, #e91e63, #ff0077); color: #e91e63; }
+        .line.brown { background: linear-gradient(to right, #795548, #440000); color: #795548; }
+        .line.glow {
+            box-shadow: 0 0 15px 5px currentColor;
+            animation: glowPulse 1.5s infinite alternate;
+        }
+        @keyframes glowPulse {
+            from { box-shadow: 0 0 10px 3px currentColor; }
+            to { box-shadow: 0 0 25px 8px currentColor; }
+        }
+        .next-btn, .restart-btn, .back-btn {
+            position: fixed;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            z-index: 20;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-size: 2rem;
+            color: white;
+            font-weight: bold;
+            border: 4px solid #fff;
+        }
+        .next-btn { top: 20px; right: 20px; background: linear-gradient(135deg, #e0aaff, #aa22ff); }
+        .restart-btn { top: 50%; left: 10%; transform: translateX(-50%); background: linear-gradient(135deg, #e0aaff, #aa22ff); }
+        .back-btn { top: 20px; left: 20px; background: linear-gradient(135deg, #e0aaff, #aa22ff); }
+        .next-btn:active, .restart-btn:active, .back-btn:active {
+            transform: scale(0.9) translateX(-50%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .message {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 30;
+            font-weight: bold;
+        }
+        .message.show { opacity: 1; }
+        .game-container[data-level="2"] .left-dots,
+        .game-container[data-level="2"] .right-dots {
+            position: absolute;
+            display: flex;
+            flex-direction: row;
+            gap: 40px;
+            z-index: 10;
+            justify-content: space-between;
+            width: calc(100% - 80px);
+        }
+        .game-container[data-level="2"] .left-dots { top: 30px; left: 40px; justify-content: flex-start; }
+        .game-container[data-level="2"] .right-dots { bottom: 30px; right: 40px; justify-content: flex-start; }
+        .cloud-container { 
+            position: relative; 
+            display: inline-block;
+            transition: transform 0.4s ease;
+        }
+        .progress-container {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: calc(100% - 20px);
+            height: 16px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 15;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff00, #00aa00);
+            border-radius: 8px;
+            transition: width 0.4s ease;
+        }
+        .cloud-container .progress-container {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 20px;
+            background: #fff; 
+            border: 3px solid #673ab7; 
+            border-radius: 15px; 
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1),
+                        0 4px 6px rgba(0,0,0,0.2); 
+        }
+
+        .cloud-container .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: repeating-linear-gradient(
+                45deg,
+                #9c27b0,
+                #9c27b0 15px,
+                #fff 15px,
+                #fff 30px
+            );
+            background-size: 40px 40px;
+            animation: moveStripes 2s linear infinite;
+            border-radius: 12px; 
+            transition: width 0.4s ease-in-out;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1); 
+        }
+
+        @keyframes moveStripes {
+            from { background-position: 0 0; }
+            to { background-position: 40px 0; }
+        }
+        
+
+       .lock-screen {
+            position: fixed; 
+            top:0; 
+            left:0; 
+            width:100%; 
+            height:100%;
+            background: rgba(0,0,0,0.6); 
+            display:flex; 
+            justify-content:center; 
+            align-items:center;
+            z-index:2000; 
+            display:none;
+        }
+
+        /* Estilo da caixa de bloqueio */
+        .lock-box {
+            background: rgba(255, 255, 255, 0.4);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            padding: 30px 40px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            max-width: 350px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .lock-box h2 { 
+            color: #4a148c; 
+            margin-bottom: 0.5rem; 
+            font-weight: 700;
+        }
+
+        .lock-box p {
+            color: #6a0dad;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .lock-box input {
+            padding:0.7rem; font-size:1rem; margin-bottom:1rem;
+    width:80%; max-width:250px;
+    border:3px solid #f2e2ff; border-radius:15px;
+    outline:none; transition:0.3s; background-color:#f8f0ff;
+    text-align:center; color:#4a148c;
+        }
+
+        .lock-box input:focus {
+            border-color:#d1b8ff; box-shadow:0 0 8px rgba(209,184,255,0.8);
+        }
+        
+        .lock-box button {
+            background: linear-gradient(135deg, #a6c0fe, #fbc2eb);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            border-radius: 15px;
+            border: none;
+            font-size: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .lock-box button:hover {
+            transform:scale(1.1);
+        }
+        
+        .lock-box #unlockFeedback {
+            color:#ff5252; font-weight:bold; margin-top:10px; animation:fadeIn 0.5s;
+        }
+
+
+/* Responsividade para telas menores */
+@media (max-width: 900px) {
+    .game-board {
+        width: 98vw;
+        max-width: 98vw;
+        height: 350px;
+        padding: 10px;
+        border-radius: 18px;
+        flex-direction: column;
+    }
+    .left-dots, .right-dots {
+        gap: 30px;
+    }
+    .cloud-container {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+    .cloud {
+        width: 160px;
+    }
+}
+
+@media (max-width: 600px) {
+    h1 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    .game-board {
+        width: 100vw;
+        height: 220px;
+        padding: 4px;
+        border-radius: 12px;
+    }
+    .dot {
+        width: 32px;
+        height: 32px;
+    }
+    .left-dots, .right-dots {
+        gap: 18px;
+    }
+    .cloud {
+        width: 90px;
+    }
+    .cloud-container .progress-container {
+        width: 110px;
+        height: 12px;
+    }
+    .next-btn, .restart-btn, .back-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+        border-width: 2px;
+    }
+    .message {
+        font-size: 0.9rem;
+        padding: 7px 12px;
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 400px) {
+    .game-board {
+        height: 140px;
+    }
+    .dot {
+        width: 22px;
+        height: 22px;
+    }
+    .cloud {
+        width: 55px;
+    }
+    .cloud-container .progress-container {
+        width: 60px;
+        height: 8px;
+    }
+}
+    </style>
+</head>
+<body>
+    <button class="restart-btn" id="restart-btn-global">⟳</button>
+    <button class="back-btn" id="back-btn-global">⬅</button>
+    <button class="next-btn" id="next-btn-global" style="display:none">➡</button>
+
+    <div id="start-screen" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg,#fbc2eb,#a6c0fe);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+">
+    <h1 style="
+        color: #fff;
+        font-size: 2.5rem;
+        text-align: center;
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+        margin-bottom: 20px;
+    ">Bem-vindo ao Conecte os Fios!</h1>
+    <button id="start-game-btn" style="
+        padding:0.8rem 2.5rem;
+        font-size:1rem;
+        border-radius:100px;
+        border:none;
+        background: linear-gradient(135deg,#5c8dff,#ff60d2);
+        color:white;
+        cursor:pointer;
+        font-weight:bold;
+        text-shadow:1px 1px 2px rgba(0,0,0,0.2);
+    ">Começar</button>
+</div>
+
+
+    <div class="carousel" id="carousel">
+        <div class="game-container" data-level="1">
+            <h1>Fase 1 - Conecte os fios!</h1>
+            <div class="game-board">
+                <div class="left-dots">
+                    <div class="dot red" data-color="red"></div>
+                    <div class="dot yellow" data-color="yellow"></div>
+                    <div class="dot green" data-color="green"></div>
+                </div>
+                <div id="line-container1"></div>
+                <div class="right-dots">
+                    <div class="dot green" data-color="green"></div>
+                    <div class="dot red" data-color="red"></div>
+                    <div class="dot yellow" data-color="yellow"></div>
+                </div>
+                <div class="cloud-container">
+                    <img class="cloud" src="nuvem2.png" alt="Nuvem">
+                    <div class="progress-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="message"></div>
+        </div>
+        <div class="game-container" data-level="2">
+            <h1>Fase 2 - Mais fios!</h1>
+            <div class="game-board">
+                <div class="left-dots">
+                    <div class="dot blue" data-color="blue"></div>
+                    <div class="dot orange" data-color="orange"></div>
+                    <div class="dot purple" data-color="purple"></div>
+                    <div class="dot pink" data-color="pink"></div>
+                    <div class="dot brown" data-color="brown"></div>
+                    <div class="dot yellow" data-color="yellow"></div>
+                </div>
+                <div id="line-container2"></div>
+                <div class="right-dots">
+                    <div class="dot purple" data-color="purple"></div>
+                    <div class="dot yellow" data-color="yellow"></div>
+                    <div class="dot blue" data-color="blue"></div>
+                    <div class="dot orange" data-color="orange"></div>
+                    <div class="dot brown" data-color="brown"></div>
+                    <div class="dot pink" data-color="pink"></div>
+                </div>
+                <div class="cloud-container">
+                    <img class="cloud" src="nuvem2.png" alt="Nuvem">
+                    <div class="progress-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="message"></div>
+        </div>
+    </div>
+
+    <div class="lock-screen" id="lock-screen">
+      <div class="lock-box">
+        <p class="text-xs text-gray-400 font-normal">Painel Parental</p>
+        <h2 class="text-base text-gray-600 font-normal mb-2">Tempo esgotado!</h2>
+        <p class="text-sm font-light">Digite a senha para continuar jogando:</p>
+        <input type="password" id="unlockPassword" placeholder="Senha">
+        <br>
+        <button onclick="unlockGame()">Desbloquear</button>
+        <p id="unlockFeedback" style="color:red;font-weight:bold;margin-top:8px;"></p>
+      </div>
+    </div>
+
+    <script>
+
+    // Cria o som de entrada
+    const entranceSound = new Audio('oqueenuvem.mp3'); // substitua 'entrada.mp3' pelo seu arquivo
+
+    // Toca o som quando o jogo carrega
+    window.addEventListener('load', () => {
+        try { 
+            entranceSound.play(); 
+        } catch(e){
+            console.warn("Erro ao tentar tocar som de entrada:", e);
+        }
+    });
+
+        // -- MESMO JS do seu jogo, sem alteração na lógica --
+        const carousel = document.getElementById("carousel");
+        let currentSlide = 0;
+        const totalSlides = 2;
+
+        const nextBtnGlobal = document.getElementById("next-btn-global");
+        const restartBtnGlobal = document.getElementById("restart-btn-global");
+        const backBtnGlobal = document.getElementById("back-btn-global");
+
+        const gameContainers = document.querySelectorAll(".game-container");
+        let currentGame = null;
+        const games = {};
+        let confettiInterval = null;
+
+        function startConfetti() {
+            if (confettiInterval) clearInterval(confettiInterval);
+            confettiInterval = setInterval(() => {
+                confetti({ particleCount: 150, spread: 180, ticks: 400, origin: { y: 0 } });
+            }, 500);
+        }
+
+        function stopConfetti() {
+            if (confettiInterval) { clearInterval(confettiInterval); confettiInterval = null; }
+        }
+
+        const sounds = {
+            correct: new Audio('fiocorreto.mp3'),
+            wrong: new Audio('fioincorreto.mp3'),
+            complete: new Audio('vitoria.mp3'),
+            click: new Audio('click.mp3')
+        };
+
+        function initGame(container) {
+            const leftDots = container.querySelectorAll(".left-dots .dot");
+            const rightDots = container.querySelectorAll(".right-dots .dot");
+            const lineContainer = container.querySelector('[id^="line-container"]');
+            const gameBoard = container.querySelector(".game-board");
+            const progressBar = container.querySelector(".progress-bar");
+            const messageDiv = container.querySelector(".message");
+            const allDots = [...leftDots, ...rightDots];
+
+            let isDrawing = false;
+            let activeDot = null;
+            let tempLine = null;
+            const total = leftDots.length;
+
+            const game = { lineContainer, progressBar, connected: 0, total, container, dots: allDots, resetState: null };
+
+            allDots.forEach(dot => {
+                dot.addEventListener("mousedown", (e) => startLine(e, dot));
+                dot.addEventListener("mouseup", (e) => endLine(e, dot));
+                dot.addEventListener("touchstart", (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    startLine({clientX: touch.clientX, clientY: touch.clientY, preventDefault: ()=>{}}, dot);
+                }, {passive:false});
+                dot.addEventListener("touchend", (e) => {
+                    e.preventDefault();
+                    endLine(e, dot);
+                });
+            });
+
+            gameBoard.addEventListener("mousemove", (e) => drawLine(e));
+            gameBoard.addEventListener("mouseup", () => {
+                if (isDrawing && tempLine) {
+                    tempLine.remove();
+                    showMessage("Tente de novo!");
+                    try { sounds.wrong.play(); } catch(e){}
+                    resetState();
+                }
+            });
+
+            document.addEventListener("mouseup", () => {
+                if (isDrawing && tempLine) {
+                    tempLine.remove();
+                    showMessage("Tente de novo!");
+                    try { sounds.wrong.play(); } catch(e){}
+                    resetState();
+                }
+            });
+
+            function startLine(e, dot) {
+                e.preventDefault && e.preventDefault();
+                if (dot.classList.contains('connected')) return;
+                isDrawing = true;
+                activeDot = dot;
+                tempLine = document.createElement("div");
+                tempLine.classList.add("line", dot.dataset.color);
+
+                const boardRect = gameBoard.getBoundingClientRect();
+                const dotRect = dot.getBoundingClientRect();
+                tempLine.style.left = (dotRect.left - boardRect.left + dot.offsetWidth / 2) + "px";
+                tempLine.style.top = (dotRect.top - boardRect.top + dot.offsetHeight / 2) + "px";
+                tempLine.style.width = "0px";
+
+                lineContainer.appendChild(tempLine);
+            }
+
+            function drawLine(e) {
+                if (!isDrawing || !tempLine) return;
+                const boardRect = gameBoard.getBoundingClientRect();
+                const x = (e.clientX !== undefined) ? e.clientX - boardRect.left : (e.touches ? e.touches[0].clientX - boardRect.left : 0);
+                const y = (e.clientY !== undefined) ? e.clientY - boardRect.top : (e.touches ? e.touches[0].clientY - boardRect.top : 0);
+
+                const sx = parseFloat(tempLine.style.left);
+                const sy = parseFloat(tempLine.style.top);
+                const dx = x - sx;
+                const dy = y - sy;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+                tempLine.style.width = dist + "px";
+                tempLine.style.transform = `rotate(${angle}deg)`;
+            }
+
+            function endLine(e, dot) {
+                if (!isDrawing || !tempLine) return;
+
+                if (activeDot === dot) {
+                    tempLine.remove();
+                    resetState();
+                    return;
+                }
+
+                if (activeDot.dataset.color === dot.dataset.color &&
+                    !dot.classList.contains('connected') &&
+                    !activeDot.classList.contains('connected')) {
+
+                    const startRect = activeDot.getBoundingClientRect();
+                    const endRect = dot.getBoundingClientRect();
+                    const boardRect = gameBoard.getBoundingClientRect();
+
+                    const sx = startRect.left - boardRect.left + startRect.width / 2;
+                    const sy = startRect.top - boardRect.top + startRect.height / 2;
+                    const ex = endRect.left - boardRect.left + endRect.width / 2;
+                    const ey = endRect.top - boardRect.top + endRect.height / 2;
+
+                    const dx = ex - sx;
+                    const dy = ey - sy;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+                    tempLine.style.left = sx + "px";
+                    tempLine.style.top = sy + "px";
+                    tempLine.style.width = dist + "px";
+                    tempLine.style.transform = `rotate(${angle}deg)`;
+                    tempLine.classList.add("glow");
+
+                    activeDot.classList.add("connected");
+                    dot.classList.add("connected");
+                    activeDot.style.pointerEvents = "none";
+                    dot.style.pointerEvents = "none";
+
+                    game.connected++;
+                    if (game.progressBar) {
+                        game.progressBar.style.width = (game.connected / game.total * 100) + "%";
+                    }
+
+                    const cloudContainer = container.querySelector(".cloud-container");
+                    if (cloudContainer) {
+                        const progress = game.connected / game.total;
+                        const scale = 1 + progress * 0.5;
+                        cloudContainer.style.transform = `scale(${scale})`;
+                    }
+
+                    showMessage("Conexão Perfeita!");
+                    try { sounds.correct.play(); } catch(e){}
+
+                    if (game.connected === game.total) {
+                        nextBtnGlobal.style.display = (currentSlide + 1 < totalSlides) ? "block" : "none";
+                        showMessage("Parabéns! Fase concluída!");
+                        startConfetti();
+                        try { sounds.complete.play(); } catch(e){}
+                        startGame();
+                    }
+                } else {
+                    tempLine.remove();
+                    showMessage("Cores diferentes. Tente de novo.");
+                    try { sounds.wrong.play(); } catch(e){}
+                }
+
+                resetState();
+            }
+
+            function showMessage(text) {
+                if (!messageDiv) return;
+                messageDiv.textContent = text;
+                messageDiv.classList.add("show");
+                setTimeout(() => messageDiv.classList.remove("show"), 2000);
+            }
+
+            function resetState() {
+                isDrawing = false;
+                activeDot = null;
+                tempLine = null;
+            }
+
+            game.resetState = resetState;
+            return game;
+        }
+
+        function resetGame(game) {
+            stopConfetti();
+            const lines = game.lineContainer.querySelectorAll(".line");
+            lines.forEach(line => line.remove());
+            if (game.progressBar) game.progressBar.style.width = "0%";
+            game.connected = 0;
+            game.dots.forEach(d => { d.classList.remove("connected"); d.style.pointerEvents = ""; });
+            const cloudContainer = game.container.querySelector(".cloud-container");
+            if (cloudContainer) cloudContainer.style.transform = "scale(1)";
+            nextBtnGlobal.style.display = "none";
+            if (game.resetState) game.resetState();
+        }
+
+        function loadGame(index) {
+            carousel.style.transform = `translateX(-${100 * index}%)`;
+            if (!games[index]) games[index] = initGame(gameContainers[index]);
+            currentGame = games[index];
+            resetGame(currentGame);
+            backBtnGlobal.style.display = (index === 0) ? 'block' : 'block'; 
+            currentSlide = index;
+        }
+
+        restartBtnGlobal.addEventListener("click", () => { try { sounds.click.play(); } catch(e){} if (currentGame) resetGame(currentGame); });
+
+       // Reinício
+restartBtnGlobal.addEventListener("click", (e) => {
+    e.stopPropagation(); // evita interferência do mouseup do jogo
+    try { sounds.click.play(); } catch(e){}
+    if (currentGame) resetGame(currentGame);
+});
+
+// Próximo
+restartBtnGlobal.addEventListener("click", () => { 
+    try { sounds.click.play(); } catch(e){}
+    if (currentGame) resetGame(currentGame); 
+});
+
+nextBtnGlobal.addEventListener("click", () => { 
+    try { sounds.click.play(); } catch(e){}
+    if (currentSlide + 1 < totalSlides) loadGame(currentSlide + 1); 
+});
+
+backBtnGlobal.addEventListener("click", () => { 
+    try { sounds.click.play(); } catch(e){}
+    if (currentSlide === 0) {
+        window.location.href = "jogos.html";
+    } else {
+        loadGame(currentSlide - 1);
+    }
+});
+
+
+        loadGame(0);
+
+        function startTimerGame(){
+            clearInterval(window.limitCheckerGame);
+            window.limitCheckerGame = setInterval(()=>{
+                const gameLimit = parseInt(localStorage.getItem('gameLimit')) || 0;
+                const gameStart = parseInt(localStorage.getItem('gameStart')) || 0;
+                if(gameLimit && gameStart){
+                    const elapsed = (Date.now() - gameStart) / 1000;
+                    if(elapsed >= gameLimit){
+                        clearInterval(window.limitCheckerGame);
+                        const lock = document.getElementById("lock-screen");
+                        if(lock) lock.style.display = "flex";
+                    }
+                }
+            }, 1000);
+        }
+
+        function unlockGame(){
+            const input = document.getElementById("unlockPassword").value;
+            const savedPassword = localStorage.getItem("parentPassword") || "1234";
+            const feedback = document.getElementById("unlockFeedback");
+            if(input === savedPassword){
+                document.getElementById("lock-screen").style.display = "none";
+                document.getElementById("unlockPassword").value = "";
+                feedback.textContent = "";
+                localStorage.setItem('gameStart', Date.now());
+                startTimerGame();
+            } else {
+                feedback.textContent = "Senha incorreta!";
+            }
+        }
+
+        if(localStorage.getItem('gameLimit') && localStorage.getItem('gameStart')){
+            startTimerGame();
+        }
+
+        function startGame() {
+            const gameName = "Conectar fios"; 
+            let historico = JSON.parse(localStorage.getItem("gameHistory")) || {};
+
+            if (!historico[gameName]) {
+                historico[gameName] = { plays: 0 };
+            }
+
+            historico[gameName].plays += 1;
+
+            localStorage.setItem("gameHistory", JSON.stringify(historico));
+        }
+constentranceSound = new Audio('oqueenuvem.mp3'); // primeiro som
+constafterSound = new Audio('conecteoscabos.mp3'); // segundo som
+
+document.getElementById("start-game-btn").addEventListener("click", function() {
+    // Esconde a tela inicial
+    document.getElementById("start-screen").style.display = "none";
+
+    // Garante que o evento 'ended' do primeiro som está registrado antes de tocar
+    entranceSound.addEventListener("ended", () => {
+        afterSound.play().catch(e => console.warn("Erro ao tocar o segundo som:", e));
+    }, { once: true }); // 'once' evita múltiplos disparos
+
+    // Toca o primeiro som
+    entranceSound.play().catch(e => console.warn("Erro ao tocar o primeiro som:", e));
+});
+
+
+    </script>
+    <script src="/register-sw.js"></script>
+</body>
+</html>
